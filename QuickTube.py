@@ -2,34 +2,46 @@ from pytube import YouTube
 import os
 import customtkinter as ctk
 import tkinter as tk
+from tkinter import messagebox
 
 w = ctk.CTk()
 
+links = []
 
+def link_extraction():
+    link_arr = link_textbox.get("1.0", "end-1c")
+    links = link_arr.splitlines()
+    return [link.strip() for link in links if link.strip()]
+
+destination = '.'
+def destination_input():
+    destination = location.get().strip() or '.'
+    return destination
 
 def mp3_video():
     urls = link_extraction()
-    video_type = 1
+    destination = destination_input()
+
     for url in urls:
-        download_video(video_type, url, destination)
+        download_video(url, destination, video_type=1)
+
+    link_textbox.delete("1.0", tk.END)
+    location.delete(0, tk.END)
+
 
 def mp4_video():
-    url = link_extraction()
-    video_type = 2
-    download_video(video_type, url, destination)
+    urls = link_extraction()
+    destination = destination_input()
 
-def download_video(video_type, url, destination):
+    for url in urls:
+        download_video(url, destination, video_type=2)
 
-    if url == "":
-        print("erdhi deri ktu ---------------------------------------------------------------------------")
+    link_textbox.delete("1.0", tk.END)
+    location.delete(0, tk.END)
 
-        return False
 
+def download_video(url, destination, video_type):
     try :
-        print("erdhi deri ktu ========================================================================================")
-        print(type(url))
-        print("erdhi deri ktu ========================================================================================")
-
         yt = YouTube(url)
 
         if video_type == 1:
@@ -44,72 +56,49 @@ def download_video(video_type, url, destination):
             video_type = yt.streams.get_highest_resolution()
             video_type.download(output_path=destination)
 
-        else:
-            print("The number you enterd is incorrect, please make sure you enter either 1 or 2.")
+        messagebox.showinfo("Success", yt.title + " has been successfully downloaded!")
 
-        print(yt.title + " has been successfully downloaded!")
-        
     except Exception as e:
-        messagebox = tk.messagebox.Message(str(e), title="My Message Box", message="Error, something went wrong with " + yt.title + " Try again!")
-        messagebox.showinfo()
-
-
-def link_extraction():
-    # link_var = tk.Text
-    link_arr = link_textbox.get("0.0", "end")
-    link_textbox.insert("0.0", "wubba lubba dub dub")
-    return link_arr
-
-# links = []
-# link_var = tk.Text
-
-# def link_get():
-#     links.cget('1.0', END)
-
-# def link_add():
-#     links.append(link_var)
-
-
-destination = ctk.StringVar()
-def destination_input():
-    dest = destination.strip()
-    if not dest:
-        dest = '.'
-    
-# def start():
-#     for url in links:
-#         download_video(url, destination)
-
+        messagebox.showinfo("Error", "Error downloading " + yt.title + ": " + str(e))
 
 ctk.set_appearance_mode('dark')
 ctk.set_default_color_theme('blue')
 
-
 w.geometry('500x680')
 
 frame = ctk.CTkFrame(master=w, border_color='#F2696A', border_width=1.5, fg_color='#181620' )
-frame.pack(pady=20, padx=40, fill='both', 
-expand=True)
+frame.pack(pady=20, padx=40, fill='both', expand=True)
 
 quicktube = ctk.CTkLabel(master=frame, text='QuickTube', 
-anchor='center', font=('Cocon-Regular', 70), text_color='#F2696A')
+font=('Cocon-Regular', 70), text_color='#F2696A')
 quicktube.pack(pady=42, padx=10)
 
 dropdat = ctk.CTkLabel(master=frame, text='Drop those links here...',
-anchor='center', font=('Cocon-Regular', 25), text_color='#F2696A', )
+font=('Cocon-Regular', 25), text_color='#F2696A', )
 dropdat.pack( padx=10)
 
 link_textbox = ctk.CTkTextbox(master=frame, width=350, height= 100, 
 font=('Helvetica', 15), fg_color=('#FFF5E1'), text_color='#2B2B2B',)
 link_textbox.pack(pady=15, padx=10)
-link_textbox.focus()
+
+whereto = ctk.CTkLabel(master=frame, text='Where to champ?',
+font=('Cocon-Regular', 25), text_color='#F2696A')
+whereto.pack(pady=5, padx=10)
+
+location = ctk.CTkEntry(master=frame, width=350, height=40, font=('Helvetica', 15),
+fg_color=('#FFF5E1'), text_color='#2B2B2B')
+location.pack(pady=5, padx=10)
 
 button_frame = ctk.CTkFrame(master=frame, fg_color='transparent')
 button_frame.pack(pady=10)
 
+howefeelin = ctk.CTkLabel(master=button_frame, text='How we feelin today?',
+font=('Cocon-Regular', 25), text_color='#F2696A')
+howefeelin.pack(padx=10)
+
 mp3 = ctk.CTkButton(master=button_frame, width=100, height=40, text="MP3", 
-hover=True, fg_color='#FFF5E1', text_color='#2B2B2B', 
-hover_color='#F2696A', font=('Cocon-Regular', 25), command=mp3_video())
+hover=True, fg_color='#FFF5E1', text_color='#2B2B2B', command=mp3_video,
+hover_color='#F2696A', font=('Cocon-Regular', 25))
 mp3.pack(side='left', padx=10)
 
 orr = ctk.CTkLabel(master=button_frame, text='or',
@@ -117,31 +106,8 @@ font=('Cocon-Regular', 25), text_color='#FFF5E1')
 orr.pack(side='left', padx=10)
 
 mp4 = ctk.CTkButton(master=button_frame, width=100, height=40, text="MP4", 
-hover=True, fg_color='#FFF5E1', text_color='#2B2B2B', 
-hover_color='#F2696A', font=('Cocon-Regular', 25), command=mp4_video())
+hover=True, fg_color='#FFF5E1', text_color='#2B2B2B', command=mp4_video,
+hover_color='#F2696A', font=('Cocon-Regular', 25))
 mp4.pack(side='left', padx=10)
-
-
-howefeelin = ctk.CTkLabel(master=frame, text='How we feelin today?',
-anchor='center', font=('Cocon-Regular', 25), text_color='#F2696A')
-howefeelin.pack(padx=10)
-
-
-whereto = ctk.CTkLabel(master=frame, text='Where to champ?',
-anchor='center', font=('Cocon-Regular', 25), text_color='#F2696A')
-whereto.pack(pady=5, padx=10)
-
-location = ctk.CTkEntry(master=frame, width=350, height=40, font=('Helvetica', 15),
-fg_color=('#FFF5E1'), text_color='#2B2B2B', command=destination_input())
-location.pack(pady=5, padx=10)
-
-ready = ctk.CTkLabel(master=frame, text='Ready?',
-anchor='center', font=('Cocon-Regular', 25), text_color='#F2696A')
-ready.pack(pady=10, padx=10)
-
-# start = ctk.CTkButton(master=frame, width=100, height=40, text="Start", 
-# hover=True, fg_color='#FFF5E1', text_color='#2B2B2B', 
-# hover_color='#F2696A', font=('Cocon-Regular', 25), command=start())
-# start.pack( padx=10)
 
 w.mainloop()
